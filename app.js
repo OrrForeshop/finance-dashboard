@@ -1,7 +1,7 @@
 // Finance dashboard (LTR) — localStorage only
 // Spreadsheet-style tables (Google Sheets feel): fixed rows, direct editing, Tab/Enter navigation.
 
-const STORAGE_KEY = 'finance-dashboard.v4';
+const STORAGE_KEY = 'finance-dashboard.v5';
 const FIXED_ROWS = 20;
 
 function todayMonth() {
@@ -18,43 +18,29 @@ function money(v) {
   return `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function uid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+function pct(actual, budget) {
+  const a = n(actual);
+  const b = n(budget);
+  if (!(b > 0)) return '';
+  return `${Math.round((a / b) * 100)}%`;
 }
 
-function migrateFromV2() {
-  // v2 had months: { ym: { in/out/savings arrays } }
-  try {
-    const raw = localStorage.getItem('finance-dashboard.v2');
-    if (!raw) return null;
-    const old = JSON.parse(raw);
-    if (!old || typeof old !== 'object' || !old.months) return null;
-
-    const next = { months: {} };
-    for (const [ym, ms] of Object.entries(old.months)) {
-      const income = (ms?.in || []).reduce((a, r) => a + n(r.amount), 0);
-      const variable = (ms?.out || []).map(r => ({ name: r.name ?? 'Expense', amount: String(n(r.amount) || '') }));
-      const savings = (ms?.savings || []).map(r => ({ name: r.name ?? 'Savings', amount: String(n(r.amount) || '') }));
-
-      next.months[ym] = {
-        income,
-        budgets: { debt: 0, savings: 0, variable: 0, fixed: 0 },
-        debt: padToRows([]),
-        savings: padToRows(savings),
-        variable: padToRows(variable),
-        fixed: padToRows([]),
-      };
-    }
-    return next;
-  } catch {
-    return null;
-  }
+function padToRows(list) {
+  const out = Array.isArray(list) ? list.slice(0, FIXED_ROWS) : [];
+  while (out.length < FIXED_ROWS) out.push({ name: '', day: '', actual: '', budget: '' });
+  return out.map(r => ({
+    name: String(r?.name ?? ''),
+    day: String(r?.day ?? ''),
+    actual: r?.actual == null ? '' : String(r.actual),
+    budget: r?.budget == null ? '' : String(r.budget),
+  }));
 }
 
-function migrateFromV3() {
-  // v3 stored arrays with ids + add/delete behavior. Convert to fixed rows.
+function migrateFromV4() {
+  // v4 stored: income (number), budgets (object), and {debt,savings,variable,fixed} arrays: {name, amount}
+  // Convert to v5 tables: {name, day, actual, budget} for all sections + income table.
   try {
-    const raw = localStorage.getItem('finance-dashboard.v3');
+    const raw = localStorage.getItem('finance-dashboard.v4');
     if (!raw) return null;
     const old = JSON.parse(raw);
     if (!old || typeof old !== 'object' || !old.months) return null;
@@ -64,19 +50,18 @@ function migrateFromV3() {
       const ms = ms0 || {};
       const conv = (arr) => (arr || []).map(r => ({
         name: String(r?.name ?? ''),
-        amount: r?.amount === 0 ? '' : String(r?.amount ?? ''),
+        day: '',
+        actual: r?.amount === 0 ? '' : String(r?.amount ?? ''),
+        budget: '',
       }));
 
+      const incomeVal = n(ms.income);
+      const incomeRows = [{ name: 'Income', day: '', actual: incomeVal ? String(incomeVal) : '', budget: incomeVal ? String(incomeVal) : '' }];
+
       next.months[ym] = {
-        income: n(ms.income),
-        budgets: {
-          debt: n(ms.budgets?.debt),
-          savings: n(ms.budgets?.savings),
-          variable: n(ms.budgets?.variable),
-          fixed: n(ms.budgets?.fixed),
-        },
-        debt: padToRows(conv(ms.debt)),
+        income: padToRows(incomeRows),
         savings: padToRows(conv(ms.savings)),
+        debt: padToRows(conv(ms.debt)),
         variable: padToRows(conv(ms.variable)),
         fixed: padToRows(conv(ms.fixed)),
       };
@@ -91,10 +76,8 @@ function loadStore() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      const migratedV3 = migrateFromV3();
-      if (migratedV3) return migratedV3;
-      const migratedV2 = migrateFromV2();
-      if (migratedV2) return migratedV2;
+      const migratedV4 = migrateFromV4();
+      if (migratedV4) return migratedV4;
       return { months: {} };
     }
     const data = JSON.parse(raw);
@@ -110,261 +93,116 @@ function saveStore(store) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
 }
 
-function padToRows(list) {
-  const out = Array.isArray(list) ? list.slice(0, FIXED_ROWS) : [];
-  while (out.length < FIXED_ROWS) out.push({ name: '', amount: '' });
-  return out.map(r => ({ name: String(r?.name ?? ''), amount: r?.amount == null ? '' : String(r.amount) }));
-}
-
 function seedMonth() {
   return {
-    income: 6500,
-    budgets: {
-      debt: 700,
-      savings: 600,
-      variable: 900,
-      fixed: 2400,
-    },
-    debt: padToRows([
-      { name: 'Credit Card', amount: '220' },
-      { name: 'Car Loan', amount: '420' },
+    income: padToRows([
+      { name: 'Salary', day: '1', actual: '6500', budget: '6500' },
     ]),
     savings: padToRows([
-      { name: 'Emergency Fund', amount: '350' },
+      { name: 'Emergency Fund', day: '', actual: '350', budget: '600' },
+    ]),
+    debt: padToRows([
+      { name: 'Credit Card', day: '', actual: '220', budget: '300' },
+      { name: 'Car Loan', day: '', actual: '420', budget: '400' },
     ]),
     variable: padToRows([
-      { name: 'Groceries', amount: '480' },
-      { name: 'Dining', amount: '160' },
+      { name: 'Groceries', day: '', actual: '480', budget: '500' },
+      { name: 'Dining', day: '', actual: '160', budget: '200' },
     ]),
     fixed: padToRows([
-      { name: 'Rent', amount: '1900' },
-      { name: 'Internet', amount: '60' },
-      { name: 'Phone', amount: '55' },
+      { name: 'Rent', day: '', actual: '1900', budget: '1900' },
+      { name: 'Internet', day: '', actual: '60', budget: '70' },
+      { name: 'Phone', day: '', actual: '55', budget: '60' },
     ]),
   };
 }
 
+function normalizeMonth(ms) {
+  ms.income = padToRows(ms.income);
+  ms.savings = padToRows(ms.savings);
+  ms.debt = padToRows(ms.debt);
+  ms.variable = padToRows(ms.variable);
+  ms.fixed = padToRows(ms.fixed);
+  return ms;
+}
+
+const store = loadStore();
+
 const els = {
   month: document.getElementById('month'),
-  income: document.getElementById('income'),
-  budgetDebt: document.getElementById('budgetDebt'),
-  budgetSavings: document.getElementById('budgetSavings'),
-  budgetVariable: document.getElementById('budgetVariable'),
-  budgetFixed: document.getElementById('budgetFixed'),
 
-  kpiDebt: document.getElementById('kpiDebt'),
-  kpiSavings: document.getElementById('kpiSavings'),
-  kpiVariable: document.getElementById('kpiVariable'),
-  kpiFixed: document.getElementById('kpiFixed'),
-
-  ovTotalExpenses: document.getElementById('ovTotalExpenses'),
-  ovTotalSaved: document.getElementById('ovTotalSaved'),
-  ovRemaining: document.getElementById('ovRemaining'),
-
-  donutLabel: document.getElementById('donutLabel'),
-
+  // tbodies
+  tbodySavings: document.getElementById('tbodySavings'),
   tbodyDebt: document.getElementById('tbodyDebt'),
   tbodyVariable: document.getElementById('tbodyVariable'),
   tbodyFixed: document.getElementById('tbodyFixed'),
-  tbodySavings: document.getElementById('tbodySavings'),
+  tbodyIncome: document.getElementById('tbodyIncome'),
 
-  chartDistribution: document.getElementById('chartDistribution'),
-  chartBudget: document.getElementById('chartBudget'),
-  chartRemaining: document.getElementById('chartRemaining'),
+  // table totals (tfoot)
+  totalSavingsActual: document.getElementById('totalSavingsActual'),
+  totalSavingsBudget: document.getElementById('totalSavingsBudget'),
+  totalDebtActual: document.getElementById('totalDebtActual'),
+  totalDebtBudget: document.getElementById('totalDebtBudget'),
+  totalVariableActual: document.getElementById('totalVariableActual'),
+  totalVariableBudget: document.getElementById('totalVariableBudget'),
+  totalFixedActual: document.getElementById('totalFixedActual'),
+  totalFixedBudget: document.getElementById('totalFixedBudget'),
+  totalIncomeActual: document.getElementById('totalIncomeActual'),
+  totalIncomeBudget: document.getElementById('totalIncomeBudget'),
+
+  // summary
+  sumIncomeActual: document.getElementById('sumIncomeActual'),
+  sumIncomeBudget: document.getElementById('sumIncomeBudget'),
+  sumExpensesActual: document.getElementById('sumExpensesActual'),
+  sumExpensesBudget: document.getElementById('sumExpensesBudget'),
+  sumSavingsActual: document.getElementById('sumSavingsActual'),
+  sumSavingsBudget: document.getElementById('sumSavingsBudget'),
+  sumRemaining: document.getElementById('sumRemaining'),
+  sumRemainingPill: document.getElementById('sumRemainingPill'),
 };
 
-const store = loadStore();
 els.month.value = todayMonth();
-
-function normalizeMonth(ms) {
-  ms.income ??= 0;
-  ms.budgets ||= {};
-  ms.budgets.debt ??= 0;
-  ms.budgets.savings ??= 0;
-  ms.budgets.variable ??= 0;
-  ms.budgets.fixed ??= 0;
-
-  ms.debt = padToRows(ms.debt);
-  ms.savings = padToRows(ms.savings);
-  ms.variable = padToRows(ms.variable);
-  ms.fixed = padToRows(ms.fixed);
-
-  return ms;
-}
 
 function getMonthState(ym) {
   if (!store.months[ym]) store.months[ym] = seedMonth();
   return normalizeMonth(store.months[ym]);
 }
 
-function sum(list) {
-  return (list || []).reduce((a, r) => a + n(r.amount), 0);
+function sectionTotals(rows) {
+  let actual = 0;
+  let budget = 0;
+  for (const r of (rows || [])) {
+    actual += n(r.actual);
+    budget += n(r.budget);
+  }
+  return { actual, budget };
 }
 
 function totals(ms) {
-  const debt = sum(ms.debt);
-  const savings = sum(ms.savings);
-  const variable = sum(ms.variable);
-  const fixed = sum(ms.fixed);
+  const income = sectionTotals(ms.income);
+  const savings = sectionTotals(ms.savings);
+  const debt = sectionTotals(ms.debt);
+  const variable = sectionTotals(ms.variable);
+  const fixed = sectionTotals(ms.fixed);
 
-  const totalExpenses = debt + variable + fixed;
-  const totalSaved = savings;
-  const remaining = n(ms.income) - totalExpenses - totalSaved;
-  return { debt, savings, variable, fixed, totalExpenses, totalSaved, remaining };
+  const expenses = { actual: debt.actual + variable.actual + fixed.actual, budget: debt.budget + variable.budget + fixed.budget };
+  const remaining = income.actual - expenses.actual - savings.actual;
+
+  return { income, savings, debt, variable, fixed, expenses, remaining };
 }
 
-let distributionChart = null;
-let budgetChart = null;
-let remainingChart = null;
+function setProgressCell(td, actual, budget) {
+  const el = td.querySelector('.progress');
+  const txt = pct(actual, budget);
+  el.textContent = txt || '';
 
-function chartDefaults() {
-  Chart.defaults.color = 'rgba(17, 24, 39, 0.85)';
-  Chart.defaults.borderColor = 'rgba(17, 24, 39, 0.12)';
-  Chart.defaults.font.family = 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-}
-
-function ensureCharts() {
-  chartDefaults();
-  if (!distributionChart) {
-    distributionChart = new Chart(els.chartDistribution, {
-      type: 'pie',
-      data: {
-        labels: ['Debt', 'Variable', 'Fixed', 'Savings'],
-        datasets: [{
-          data: [0, 0, 0, 0],
-          backgroundColor: ['rgba(37,99,235,.85)','rgba(17,24,39,.55)','rgba(107,114,128,.45)','rgba(22,163,74,.55)'],
-          borderColor: 'rgba(17,24,39,.12)',
-          borderWidth: 1,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10 } },
-          tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${money(ctx.parsed)}` } }
-        }
-      }
-    });
+  el.classList.remove('bad', 'good');
+  const a = n(actual);
+  const b = n(budget);
+  if (b > 0) {
+    if (a > b) el.classList.add('bad');
+    else if (a === b) el.classList.add('good');
   }
-
-  if (!budgetChart) {
-    budgetChart = new Chart(els.chartBudget, {
-      type: 'bar',
-      data: {
-        labels: ['Debt', 'Savings', 'Variable', 'Fixed'],
-        datasets: [
-          {
-            label: 'Budget',
-            data: [0, 0, 0, 0],
-            backgroundColor: 'rgba(37,99,235,.18)',
-            borderColor: 'rgba(37,99,235,.35)',
-            borderWidth: 1,
-            borderRadius: 10,
-          },
-          {
-            label: 'Actual',
-            data: [0, 0, 0, 0],
-            backgroundColor: 'rgba(37,99,235,.70)',
-            borderColor: 'rgba(37,99,235,.85)',
-            borderWidth: 1,
-            borderRadius: 10,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { ticks: { callback: (v) => `$${v}` }, grid: { color: 'rgba(17,24,39,.10)' } },
-          x: { grid: { display: false } }
-        },
-        plugins: {
-          legend: { position: 'bottom' },
-          tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${money(ctx.parsed.y)}` } }
-        }
-      }
-    });
-  }
-
-  if (!remainingChart) {
-    remainingChart = new Chart(els.chartRemaining, {
-      type: 'doughnut',
-      data: {
-        labels: ['Remaining', 'Used'],
-        datasets: [{
-          data: [0, 0],
-          backgroundColor: ['rgba(22,163,74,.70)', 'rgba(17,24,39,.10)'],
-          borderColor: 'rgba(17,24,39,.12)',
-          borderWidth: 1,
-          hoverOffset: 6,
-          cutout: '72%'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${money(ctx.parsed)}` } }
-        }
-      }
-    });
-  }
-}
-
-function updateCharts(ms) {
-  ensureCharts();
-
-  const { debt, savings, variable, fixed, remaining } = totals(ms);
-
-  // pie
-  distributionChart.data.datasets[0].data = [debt, variable, fixed, savings];
-  distributionChart.update();
-
-  // bar
-  const b = ms.budgets || {};
-  budgetChart.data.datasets[0].data = [n(b.debt), n(b.savings), n(b.variable), n(b.fixed)];
-  budgetChart.data.datasets[1].data = [debt, savings, variable, fixed];
-  budgetChart.update();
-
-  // donut: remaining vs used
-  const spent = Math.max(0, n(ms.income) - Math.max(remaining, 0));
-  const donutRemaining = Math.max(0, remaining);
-  remainingChart.data.datasets[0].data = [donutRemaining, spent];
-  remainingChart.update();
-
-  els.donutLabel.textContent = money(remaining);
-  const ok = remaining >= 0;
-  els.donutLabel.style.color = ok ? 'rgba(37,99,235,.95)' : 'rgba(220,38,38,.95)';
-  els.donutLabel.style.borderColor = ok ? 'rgba(37,99,235,.20)' : 'rgba(220,38,38,.25)';
-  els.donutLabel.style.background = ok ? 'rgba(37,99,235,.10)' : 'rgba(220,38,38,.08)';
-}
-
-function fillSettings(ms) {
-  els.income.value = n(ms.income);
-  els.budgetDebt.value = n(ms.budgets?.debt);
-  els.budgetSavings.value = n(ms.budgets?.savings);
-  els.budgetVariable.value = n(ms.budgets?.variable);
-  els.budgetFixed.value = n(ms.budgets?.fixed);
-}
-
-function updateDerived(ms) {
-  const t = totals(ms);
-
-  // KPIs
-  els.kpiDebt.textContent = money(t.debt);
-  els.kpiSavings.textContent = money(t.savings);
-  els.kpiVariable.textContent = money(t.variable);
-  els.kpiFixed.textContent = money(t.fixed);
-
-  // Overview
-  els.ovTotalExpenses.textContent = money(t.totalExpenses);
-  els.ovTotalSaved.textContent = money(t.totalSaved);
-  els.ovRemaining.textContent = money(t.remaining);
-  els.ovRemaining.style.color = t.remaining >= 0 ? 'rgba(22,163,74,.95)' : 'rgba(220,38,38,.95)';
-
-  updateCharts(ms);
 }
 
 function buildSheet(tbodyEl, sectionKey) {
@@ -372,6 +210,52 @@ function buildSheet(tbodyEl, sectionKey) {
   for (let r = 0; r < FIXED_ROWS; r++) {
     const tr = document.createElement('tr');
 
+    // Progress (computed)
+    const tdProg = document.createElement('td');
+    tdProg.className = 'col-progress';
+    const prog = document.createElement('div');
+    prog.className = 'progress';
+    prog.dataset.section = sectionKey;
+    prog.dataset.row = String(r);
+    tdProg.appendChild(prog);
+
+    // Actual
+    const tdActual = document.createElement('td');
+    const iActual = document.createElement('input');
+    iActual.className = 'cell num';
+    iActual.type = 'text';
+    iActual.inputMode = 'decimal';
+    iActual.autocomplete = 'off';
+    iActual.dataset.section = sectionKey;
+    iActual.dataset.row = String(r);
+    iActual.dataset.col = '1';
+    tdActual.appendChild(iActual);
+
+    // Budget
+    const tdBudget = document.createElement('td');
+    const iBudget = document.createElement('input');
+    iBudget.className = 'cell num';
+    iBudget.type = 'text';
+    iBudget.inputMode = 'decimal';
+    iBudget.autocomplete = 'off';
+    iBudget.dataset.section = sectionKey;
+    iBudget.dataset.row = String(r);
+    iBudget.dataset.col = '2';
+    tdBudget.appendChild(iBudget);
+
+    // Day
+    const tdDay = document.createElement('td');
+    const iDay = document.createElement('input');
+    iDay.className = 'cell day';
+    iDay.type = 'text';
+    iDay.inputMode = 'numeric';
+    iDay.autocomplete = 'off';
+    iDay.dataset.section = sectionKey;
+    iDay.dataset.row = String(r);
+    iDay.dataset.col = '3';
+    tdDay.appendChild(iDay);
+
+    // Name
     const tdName = document.createElement('td');
     const iName = document.createElement('input');
     iName.className = 'cell';
@@ -380,37 +264,38 @@ function buildSheet(tbodyEl, sectionKey) {
     iName.spellcheck = false;
     iName.dataset.section = sectionKey;
     iName.dataset.row = String(r);
-    iName.dataset.col = '0';
+    iName.dataset.col = '4';
     tdName.appendChild(iName);
 
-    const tdAmt = document.createElement('td');
-    const iAmt = document.createElement('input');
-    iAmt.className = 'cell amt';
-    iAmt.type = 'text';
-    iAmt.inputMode = 'decimal';
-    iAmt.autocomplete = 'off';
-    iAmt.dataset.section = sectionKey;
-    iAmt.dataset.row = String(r);
-    iAmt.dataset.col = '1';
-    tdAmt.appendChild(iAmt);
-
+    tr.appendChild(tdProg);
+    tr.appendChild(tdActual);
+    tr.appendChild(tdBudget);
+    tr.appendChild(tdDay);
     tr.appendChild(tdName);
-    tr.appendChild(tdAmt);
     tbodyEl.appendChild(tr);
   }
 }
 
 function fillSheet(tbodyEl, sectionKey, ms) {
   const rows = ms[sectionKey];
-  const inputs = tbodyEl.querySelectorAll('input.cell');
-  for (const el of inputs) {
-    const r = parseInt(el.dataset.row, 10);
-    const c = parseInt(el.dataset.col, 10);
-    if (!Number.isFinite(r) || !Number.isFinite(c)) continue;
 
-    const row = rows[r] || { name: '', amount: '' };
-    if (c === 0) el.value = row.name ?? '';
-    if (c === 1) el.value = row.amount ?? '';
+  for (let r = 0; r < FIXED_ROWS; r++) {
+    const row = rows[r] || { name: '', day: '', actual: '', budget: '' };
+    const tr = tbodyEl.children[r];
+    if (!tr) continue;
+
+    // progress td 0
+    setProgressCell(tr.children[0], row.actual, row.budget);
+
+    const iActual = tr.querySelector('input.cell[data-col="1"]');
+    const iBudget = tr.querySelector('input.cell[data-col="2"]');
+    const iDay = tr.querySelector('input.cell[data-col="3"]');
+    const iName = tr.querySelector('input.cell[data-col="4"]');
+
+    if (iActual) iActual.value = row.actual ?? '';
+    if (iBudget) iBudget.value = row.budget ?? '';
+    if (iDay) iDay.value = row.day ?? '';
+    if (iName) iName.value = row.name ?? '';
   }
 }
 
@@ -433,7 +318,10 @@ function onGridKeydown(e) {
   const col = parseInt(t.dataset.col, 10);
   if (!section || !Number.isFinite(row) || !Number.isFinite(col)) return;
 
-  // Enter should move down (like Sheets)
+  const minCol = 1;
+  const maxCol = 4;
+
+  // Enter moves down
   if (e.key === 'Enter') {
     e.preventDefault();
     const nextRow = Math.min(FIXED_ROWS - 1, row + 1);
@@ -441,15 +329,22 @@ function onGridKeydown(e) {
     return;
   }
 
-  // Tab should keep spreadsheet feel (wrap inside the table)
+  // Tab wraps inside table
   if (e.key === 'Tab') {
     e.preventDefault();
     const dir = e.shiftKey ? -1 : 1;
+
     let nextCol = col + dir;
     let nextRow = row;
 
-    if (nextCol < 0) { nextCol = 1; nextRow = Math.max(0, row - 1); }
-    if (nextCol > 1) { nextCol = 0; nextRow = Math.min(FIXED_ROWS - 1, row + 1); }
+    if (nextCol < minCol) {
+      nextCol = maxCol;
+      nextRow = Math.max(0, row - 1);
+    }
+    if (nextCol > maxCol) {
+      nextCol = minCol;
+      nextRow = Math.min(FIXED_ROWS - 1, row + 1);
+    }
 
     focusCell(section, nextRow, nextCol);
   }
@@ -458,7 +353,52 @@ function onGridKeydown(e) {
 let derivedTimer = null;
 function scheduleDerivedUpdate(ms) {
   window.clearTimeout(derivedTimer);
-  derivedTimer = window.setTimeout(() => updateDerived(ms), 60);
+  derivedTimer = window.setTimeout(() => updateDerived(ms), 50);
+}
+
+function updateTableFooters(ms) {
+  const t = totals(ms);
+
+  els.totalSavingsActual.textContent = money(t.savings.actual);
+  els.totalSavingsBudget.textContent = money(t.savings.budget);
+
+  els.totalDebtActual.textContent = money(t.debt.actual);
+  els.totalDebtBudget.textContent = money(t.debt.budget);
+
+  els.totalVariableActual.textContent = money(t.variable.actual);
+  els.totalVariableBudget.textContent = money(t.variable.budget);
+
+  els.totalFixedActual.textContent = money(t.fixed.actual);
+  els.totalFixedBudget.textContent = money(t.fixed.budget);
+
+  els.totalIncomeActual.textContent = money(t.income.actual);
+  els.totalIncomeBudget.textContent = money(t.income.budget);
+}
+
+function updateSummary(ms) {
+  const t = totals(ms);
+
+  els.sumIncomeActual.textContent = money(t.income.actual);
+  els.sumIncomeBudget.textContent = money(t.income.budget);
+
+  els.sumExpensesActual.textContent = money(t.expenses.actual);
+  els.sumExpensesBudget.textContent = money(t.expenses.budget);
+
+  els.sumSavingsActual.textContent = money(t.savings.actual);
+  els.sumSavingsBudget.textContent = money(t.savings.budget);
+
+  els.sumRemaining.textContent = money(t.remaining);
+
+  const ok = t.remaining >= 0;
+  els.sumRemainingPill.style.color = ok ? 'rgba(22,163,74,.95)' : 'rgba(220,38,38,.95)';
+  els.sumRemainingPill.style.borderColor = ok ? 'rgba(22,163,74,.25)' : 'rgba(220,38,38,.25)';
+  els.sumRemainingPill.style.background = ok ? 'rgba(22,163,74,.10)' : 'rgba(220,38,38,.08)';
+}
+
+function updateDerived(ms) {
+  // Keep inputs stable (don't re-fill while typing). Only update derived totals + summary.
+  updateTableFooters(ms);
+  updateSummary(ms);
 }
 
 function onGridInput(e) {
@@ -474,13 +414,21 @@ function onGridInput(e) {
   const ym = els.month.value || todayMonth();
   const ms = getMonthState(ym);
 
-  const cell = ms[section][row];
+  const cell = ms[section]?.[row];
   if (!cell) return;
 
-  if (col === 0) cell.name = t.value;
-  if (col === 1) cell.amount = t.value;
+  // col mapping: 1 actual, 2 budget, 3 day, 4 name
+  if (col === 1) cell.actual = t.value;
+  if (col === 2) cell.budget = t.value;
+  if (col === 3) cell.day = t.value;
+  if (col === 4) cell.name = t.value;
 
   saveStore(store);
+
+  // Update just the progress in this row quickly
+  const tr = t.closest('tr');
+  if (tr) setProgressCell(tr.children[0], cell.actual, cell.budget);
+
   scheduleDerivedUpdate(ms);
 }
 
@@ -488,38 +436,28 @@ function renderAll() {
   const ym = els.month.value || todayMonth();
   const ms = getMonthState(ym);
 
-  fillSettings(ms);
-
-  // Tables (build once then just fill)
-  if (!els.tbodyDebt.dataset.built) {
-    buildSheet(els.tbodyDebt, 'debt');
-    els.tbodyDebt.dataset.built = '1';
-    buildSheet(els.tbodyVariable, 'variable');
-    els.tbodyVariable.dataset.built = '1';
-    buildSheet(els.tbodyFixed, 'fixed');
-    els.tbodyFixed.dataset.built = '1';
+  // Build tables once
+  if (!els.tbodySavings.dataset.built) {
     buildSheet(els.tbodySavings, 'savings');
+    buildSheet(els.tbodyDebt, 'debt');
+    buildSheet(els.tbodyVariable, 'variable');
+    buildSheet(els.tbodyFixed, 'fixed');
+    buildSheet(els.tbodyIncome, 'income');
+
     els.tbodySavings.dataset.built = '1';
 
-    // Event delegation once
     document.addEventListener('keydown', onGridKeydown);
     document.addEventListener('input', onGridInput);
   }
 
+  fillSheet(els.tbodySavings, 'savings', ms);
   fillSheet(els.tbodyDebt, 'debt', ms);
   fillSheet(els.tbodyVariable, 'variable', ms);
   fillSheet(els.tbodyFixed, 'fixed', ms);
-  fillSheet(els.tbodySavings, 'savings', ms);
+  fillSheet(els.tbodyIncome, 'income', ms);
 
-  updateDerived(ms);
-}
-
-function updateSettings(patchFn) {
-  const ym = els.month.value || todayMonth();
-  const ms = getMonthState(ym);
-  patchFn(ms);
-  saveStore(store);
-  updateDerived(ms);
+  updateTableFooters(ms);
+  updateSummary(ms);
 }
 
 // Events
@@ -529,12 +467,6 @@ els.month.addEventListener('input', () => {
   saveStore(store);
   renderAll();
 });
-
-els.income.addEventListener('input', () => updateSettings(ms => { ms.income = n(els.income.value); }));
-els.budgetDebt.addEventListener('input', () => updateSettings(ms => { ms.budgets.debt = n(els.budgetDebt.value); }));
-els.budgetSavings.addEventListener('input', () => updateSettings(ms => { ms.budgets.savings = n(els.budgetSavings.value); }));
-els.budgetVariable.addEventListener('input', () => updateSettings(ms => { ms.budgets.variable = n(els.budgetVariable.value); }));
-els.budgetFixed.addEventListener('input', () => updateSettings(ms => { ms.budgets.fixed = n(els.budgetFixed.value); }));
 
 // Initial
 getMonthState(els.month.value || todayMonth());

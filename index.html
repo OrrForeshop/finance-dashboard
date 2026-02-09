@@ -8,205 +8,233 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <div class="layout">
-    <aside class="sidebar" aria-label="Sidebar">
-      <div class="sidebar-title">Settings</div>
-
-      <div class="panel">
-        <div class="panel-row">
-          <label class="label" for="income">Monthly Income</label>
-          <input id="income" class="input" type="number" inputmode="decimal" step="0.01" />
-        </div>
-
-        <div class="panel-subtitle">Budgets</div>
-        <div class="panel-grid">
-          <div class="panel-row">
-            <label class="label" for="budgetDebt">Debt</label>
-            <input id="budgetDebt" class="input" type="number" inputmode="decimal" step="0.01" />
-          </div>
-          <div class="panel-row">
-            <label class="label" for="budgetSavings">Savings</label>
-            <input id="budgetSavings" class="input" type="number" inputmode="decimal" step="0.01" />
-          </div>
-          <div class="panel-row">
-            <label class="label" for="budgetVariable">Variable</label>
-            <input id="budgetVariable" class="input" type="number" inputmode="decimal" step="0.01" />
-          </div>
-          <div class="panel-row">
-            <label class="label" for="budgetFixed">Fixed</label>
-            <input id="budgetFixed" class="input" type="number" inputmode="decimal" step="0.01" />
-          </div>
-        </div>
+  <main class="page" aria-label="Finance dashboard">
+    <header class="header">
+      <div>
+        <div class="title">Finance Dashboard</div>
+        <div class="subtitle">Google-Sheets style monthly planner (local-only)</div>
       </div>
 
-      <div class="sidebar-title" style="margin-top:14px;">General Overview</div>
-      <div class="panel overview">
-        <div class="overview-item">
-          <div class="overview-label">Total Expenses</div>
-          <div id="ovTotalExpenses" class="overview-value">$0.00</div>
-        </div>
-        <div class="overview-item">
-          <div class="overview-label">Total Saved</div>
-          <div id="ovTotalSaved" class="overview-value">$0.00</div>
-        </div>
-        <div class="overview-item">
-          <div class="overview-label">Remaining</div>
-          <div id="ovRemaining" class="overview-value">$0.00</div>
+      <div class="header-controls">
+        <div class="month">
+          <label class="label" for="month">Month</label>
+          <input id="month" class="input" type="month" />
         </div>
       </div>
+    </header>
 
-      <div class="sidebar-title" style="margin-top:14px;">Savings</div>
-      <div class="panel">
-        <div class="sheet-wrap" aria-label="Savings sheet">
+    <section class="dashboard-grid" aria-label="Monthly tables">
+      <!-- Left column -->
+      <div class="card" style="grid-area:savings">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Savings</div>
+            <div class="card-meta">Actual / Budget with progress</div>
+          </div>
+        </div>
+        <div class="sheet-wrap">
           <table class="sheet" data-section="savings" aria-label="Savings table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th class="col-amt">Amount</th>
+                <th class="col-progress">Progress %</th>
+                <th class="col-amt">Actual</th>
+                <th class="col-amt">Budget</th>
+                <th class="col-day">Day</th>
+                <th>Category / Name</th>
               </tr>
             </thead>
             <tbody id="tbodySavings"></tbody>
+            <tfoot>
+              <tr>
+                <td class="tfoot-muted"></td>
+                <td class="tfoot-num" id="totalSavingsActual">$0.00</td>
+                <td class="tfoot-num" id="totalSavingsBudget">$0.00</td>
+                <td class="tfoot-muted"></td>
+                <td class="tfoot-label">TOTAL</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
-        <div class="hint" style="margin-top:10px;">Tip: Click a cell and type. Tab/Shift+Tab moves left/right. Enter moves down.</div>
       </div>
 
-      <div class="sidebar-footer">
-        <div class="hint">Data is stored locally in your browser (localStorage).</div>
-      </div>
-    </aside>
-
-    <main class="main" aria-label="Main content">
-      <header class="header">
-        <div>
-          <div class="title">Finance Dashboard</div>
-          <div class="subtitle">Track budgets, spending, and remaining cash</div>
-        </div>
-
-        <div class="header-controls">
-          <div class="month">
-            <label class="label" for="month">Month</label>
-            <input id="month" class="input" type="month" />
-          </div>
-        </div>
-      </header>
-
-      <section class="grid-top" aria-label="Top summary cards">
-        <div class="card kpi">
-          <div class="kpi-label">Debt</div>
-          <div id="kpiDebt" class="kpi-value">$0.00</div>
-        </div>
-        <div class="card kpi">
-          <div class="kpi-label">Savings</div>
-          <div id="kpiSavings" class="kpi-value">$0.00</div>
-        </div>
-        <div class="card kpi">
-          <div class="kpi-label">Variable Expenses</div>
-          <div id="kpiVariable" class="kpi-value">$0.00</div>
-        </div>
-        <div class="card kpi">
-          <div class="kpi-label">Fixed Expenses</div>
-          <div id="kpiFixed" class="kpi-value">$0.00</div>
-        </div>
-      </section>
-
-      <section class="grid-middle" aria-label="Charts">
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Distribution</div>
-            <div class="card-meta">Debt / Variable / Fixed / Savings</div>
-          </div>
-          <div class="chart-wrap">
-            <canvas id="chartDistribution" aria-label="Distribution pie chart" role="img"></canvas>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Budget vs Actual</div>
-            <div class="card-meta">Compare budgets with spending</div>
-          </div>
-          <div class="chart-wrap">
-            <canvas id="chartBudget" aria-label="Budget vs Actual bar chart" role="img"></canvas>
-          </div>
-        </div>
-
-        <div class="card card-donut">
-          <div class="card-head">
-            <div>
-              <div class="card-title">Remaining to Spend</div>
-              <div class="card-meta">Income minus expenses and savings</div>
-            </div>
-            <div id="donutLabel" class="pill">$0.00</div>
-          </div>
-          <div class="chart-wrap donut">
-            <canvas id="chartRemaining" aria-label="Remaining to spend donut chart" role="img"></canvas>
-          </div>
-        </div>
-      </section>
-
-      <section class="grid-bottom" aria-label="Detailed tables">
-        <div class="card">
-          <div class="card-head">
+      <div class="card" style="grid-area:debt">
+        <div class="card-head">
+          <div>
             <div class="card-title">Debt</div>
-            <div class="card-meta">20 rows • edit directly like a spreadsheet</div>
-          </div>
-          <div class="sheet-wrap">
-            <table class="sheet" data-section="debt" aria-label="Debt table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th class="col-amt">Amount</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyDebt"></tbody>
-            </table>
+            <div class="card-meta">Actual / Budget with progress</div>
           </div>
         </div>
+        <div class="sheet-wrap">
+          <table class="sheet" data-section="debt" aria-label="Debt table">
+            <thead>
+              <tr>
+                <th class="col-progress">Progress %</th>
+                <th class="col-amt">Actual</th>
+                <th class="col-amt">Budget</th>
+                <th class="col-day">Day</th>
+                <th>Category / Name</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyDebt"></tbody>
+            <tfoot>
+              <tr>
+                <td class="tfoot-muted"></td>
+                <td class="tfoot-num" id="totalDebtActual">$0.00</td>
+                <td class="tfoot-num" id="totalDebtBudget">$0.00</td>
+                <td class="tfoot-muted"></td>
+                <td class="tfoot-label">TOTAL</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
 
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Variable Expenses</div>
-            <div class="card-meta">20 rows • edit directly like a spreadsheet</div>
-          </div>
-          <div class="sheet-wrap">
-            <table class="sheet" data-section="variable" aria-label="Variable expenses table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th class="col-amt">Amount</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyVariable"></tbody>
-            </table>
+      <!-- Center / Right columns -->
+      <div class="card" style="grid-area:variable">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Variable</div>
+            <div class="card-meta">Actual / Budget with progress</div>
           </div>
         </div>
+        <div class="sheet-wrap">
+          <table class="sheet" data-section="variable" aria-label="Variable table">
+            <thead>
+              <tr>
+                <th class="col-progress">Progress %</th>
+                <th class="col-amt">Actual</th>
+                <th class="col-amt">Budget</th>
+                <th class="col-day">Day</th>
+                <th>Category / Name</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyVariable"></tbody>
+            <tfoot>
+              <tr>
+                <td class="tfoot-muted"></td>
+                <td class="tfoot-num" id="totalVariableActual">$0.00</td>
+                <td class="tfoot-num" id="totalVariableBudget">$0.00</td>
+                <td class="tfoot-muted"></td>
+                <td class="tfoot-label">TOTAL</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
 
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Fixed Expenses</div>
-            <div class="card-meta">20 rows • edit directly like a spreadsheet</div>
-          </div>
-          <div class="sheet-wrap">
-            <table class="sheet" data-section="fixed" aria-label="Fixed expenses table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th class="col-amt">Amount</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyFixed"></tbody>
-            </table>
+      <div class="card" style="grid-area:fixed">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Fixed</div>
+            <div class="card-meta">Actual / Budget with progress</div>
           </div>
         </div>
-      </section>
+        <div class="sheet-wrap">
+          <table class="sheet" data-section="fixed" aria-label="Fixed table">
+            <thead>
+              <tr>
+                <th class="col-progress">Progress %</th>
+                <th class="col-amt">Actual</th>
+                <th class="col-amt">Budget</th>
+                <th class="col-day">Day</th>
+                <th>Category / Name</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyFixed"></tbody>
+            <tfoot>
+              <tr>
+                <td class="tfoot-muted"></td>
+                <td class="tfoot-num" id="totalFixedActual">$0.00</td>
+                <td class="tfoot-num" id="totalFixedBudget">$0.00</td>
+                <td class="tfoot-muted"></td>
+                <td class="tfoot-label">TOTAL</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
 
-      <footer class="footer">Finance Dashboard • Local-only storage • LTR</footer>
-    </main>
-  </div>
+      <!-- Far-right column -->
+      <div class="card" style="grid-area:summary" aria-label="Summary overview">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Summary Overview</div>
+            <div class="card-meta">Live totals from all tables</div>
+          </div>
+        </div>
+        <div class="summary" role="group" aria-label="Summary overview values">
+          <div class="summary-row">
+            <div class="summary-label">Income</div>
+            <div class="summary-values">
+              <div class="summary-pill">Actual: <span id="sumIncomeActual">$0.00</span></div>
+              <div class="summary-pill">Budget: <span id="sumIncomeBudget">$0.00</span></div>
+            </div>
+          </div>
+          <div class="summary-row">
+            <div class="summary-label">Expenses (Debt + Variable + Fixed)</div>
+            <div class="summary-values">
+              <div class="summary-pill">Actual: <span id="sumExpensesActual">$0.00</span></div>
+              <div class="summary-pill">Budget: <span id="sumExpensesBudget">$0.00</span></div>
+            </div>
+          </div>
+          <div class="summary-row">
+            <div class="summary-label">Savings</div>
+            <div class="summary-values">
+              <div class="summary-pill">Actual: <span id="sumSavingsActual">$0.00</span></div>
+              <div class="summary-pill">Budget: <span id="sumSavingsBudget">$0.00</span></div>
+            </div>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row">
+            <div class="summary-label"><strong>Remaining to Spend</strong></div>
+            <div class="summary-values">
+              <div class="summary-pill remaining" id="sumRemainingPill"><span id="sumRemaining">$0.00</span></div>
+            </div>
+          </div>
+          <div class="hint" style="margin-top:10px;">Remaining to Spend = Income − Expenses − Savings</div>
+        </div>
+      </div>
+
+      <div class="card" style="grid-area:income">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Income</div>
+            <div class="card-meta">Actual / Budget with progress</div>
+          </div>
+        </div>
+        <div class="sheet-wrap">
+          <table class="sheet" data-section="income" aria-label="Income table">
+            <thead>
+              <tr>
+                <th class="col-progress">Progress %</th>
+                <th class="col-amt">Actual</th>
+                <th class="col-amt">Budget</th>
+                <th class="col-day">Day</th>
+                <th>Category / Name</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyIncome"></tbody>
+            <tfoot>
+              <tr>
+                <td class="tfoot-muted"></td>
+                <td class="tfoot-num" id="totalIncomeActual">$0.00</td>
+                <td class="tfoot-num" id="totalIncomeBudget">$0.00</td>
+                <td class="tfoot-muted"></td>
+                <td class="tfoot-label">TOTAL</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="hint" style="padding:0 14px 14px">Tip: Click a cell and type. Tab/Shift+Tab moves left/right. Enter moves down.</div>
+      </div>
+    </section>
+
+    <footer class="footer">Finance Dashboard • Local-only storage (localStorage) • LTR</footer>
+  </main>
 
   <script src="./app.js"></script>
 </body>
