@@ -1,23 +1,20 @@
 const seed = {
   income: [
-    { source: 'Salary', planned: 5000, actual: 5000 },
-    { source: 'Freelance', planned: 800, actual: 600 },
+    { source: 'Paycheck', planned: 5000, actual: 5000 },
+    { source: 'Side work', planned: 300, actual: 250 },
   ],
   savings: [
-    { goal: 'Emergency Fund', target: 12000, current: 4500 },
+    { goal: 'Emergency fund', target: 12000, current: 4500 },
     { goal: 'Vacation', target: 3000, current: 900 },
   ],
+  // Prefilled with 4 obvious examples (requested): Rent, Groceries, Phone Bill, Transport
   fixed: [
     { category: 'Rent', planned: 1500, actual: 1500 },
-    { category: 'Utilities', planned: 260, actual: 280 },
-    { category: 'Insurance', planned: 220, actual: 220 },
-    { category: 'Debt Payments', planned: 430, actual: 430 },
+    { category: 'Phone Bill', planned: 60, actual: 60 },
   ],
   variable: [
     { category: 'Groceries', planned: 500, actual: 470 },
     { category: 'Transport', planned: 180, actual: 210 },
-    { category: 'Dining Out', planned: 250, actual: 295 },
-    { category: 'Shopping', planned: 200, actual: 240 },
   ],
   debt: [
     { debt: 'Credit Card', balance: 2500, payment: 180, apr: 19 },
@@ -43,23 +40,49 @@ function n(v) {
 function money(v) { return `$${n(v).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`; }
 function pct(v) { return `${n(v).toFixed(1)}%`; }
 
-function renderTable(tableId, rows, fields) {
+function renderTable(tableId, rows, fields, opts = {}) {
   const tbody = document.querySelector(`#${tableId} tbody`);
   tbody.innerHTML = '';
+
   rows.forEach((row, i) => {
     const tr = document.createElement('tr');
+
     fields.forEach((f) => {
       const td = document.createElement('td');
       const input = document.createElement('input');
       input.value = row[f.key] ?? '';
       input.type = f.type || 'text';
+      input.inputMode = f.type === 'number' ? 'decimal' : 'text';
+
       input.addEventListener('input', (e) => {
         row[f.key] = f.type === 'number' ? n(e.target.value) : e.target.value;
         recalc();
       });
+
       td.appendChild(input);
       tr.appendChild(td);
     });
+
+    if (opts.deletable) {
+      const td = document.createElement('td');
+      td.className = 'td-action';
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'btn-danger btn-icon';
+      del.textContent = 'X';
+      del.title = 'Delete row';
+      del.setAttribute('aria-label', 'Delete row');
+      del.addEventListener('click', (e) => {
+        e.preventDefault();
+        rows.splice(i, 1);
+        renderAll();
+      });
+
+      td.appendChild(del);
+      tr.appendChild(td);
+    }
+
     tbody.appendChild(tr);
   });
 }
@@ -190,16 +213,22 @@ function recalc() {
 function renderAll() {
   renderTable('incomeTable', seed.income, [
     { key: 'source' }, { key: 'planned', type: 'number' }, { key: 'actual', type: 'number' }
-  ]);
+  ], { deletable: true });
+
   renderTable('savingsTable', seed.savings, [
     { key: 'goal' }, { key: 'target', type: 'number' }, { key: 'current', type: 'number' }
-  ]);
+  ], { deletable: true });
+
+  // Expenses tables (both are expenses) — deletable rows
   renderTable('fixedTable', seed.fixed, [
     { key: 'category' }, { key: 'planned', type: 'number' }, { key: 'actual', type: 'number' }
-  ]);
+  ], { deletable: true });
+
   renderTable('variableTable', seed.variable, [
     { key: 'category' }, { key: 'planned', type: 'number' }, { key: 'actual', type: 'number' }
-  ]);
+  ], { deletable: true });
+
+  // Other tables unchanged
   renderTable('debtTable', seed.debt, [
     { key: 'debt' }, { key: 'balance', type: 'number' }, { key: 'payment', type: 'number' }, { key: 'apr', type: 'number' }
   ]);

@@ -1,34 +1,43 @@
 :root {
-  --bg: #f6f4fa;
+  /* High-contrast, simple palette */
+  --bg: #0b1020;
   --card: #ffffff;
-  --line: #e9e3f2;
-  --primary: #bda9d7;
-  --primary-dark: #9f87c2;
-  --text: #2d2438;
-  --muted: #716482;
-  --good: #228d5f;
-  --bad: #b23f5f;
+  --line: #d7dbe7;
+  --primary: #0057ff;
+  --primary-dark: #003bb5;
+  --danger: #e0002a;
+  --danger-dark: #b80022;
+  --text: #111827;
+  --muted: #4b5563;
+  --good: #0f8a4b;
+  --bad: #c81e3a;
 }
 * { box-sizing: border-box; }
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background: var(--bg);
+  background: radial-gradient(1200px 800px at 20% 0%, rgba(0,87,255,.22), transparent 55%), var(--bg);
   color: var(--text);
   overflow-anchor: none;
 }
 .app { max-width: 1300px; margin: 24px auto; padding: 0 14px; }
 .card {
   background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 4px 18px rgba(122, 92, 160, 0.06);
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
   padding: 16px;
 }
+.help {
+  margin: 6px 0 12px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
 .topbar { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 14px; }
-h1 { margin: 0; font-size: 1.6rem; }
-h2 { margin: 0 0 10px; font-size: 1.05rem; }
-h3 { margin: 0; font-size: .84rem; color: var(--muted); font-weight: 600; }
+h1 { margin: 0; font-size: 1.75rem; letter-spacing: -0.02em; }
+h2 { margin: 0 0 10px; font-size: 1.15rem; letter-spacing: -0.01em; }
+h3 { margin: 0; font-size: .9rem; color: var(--muted); font-weight: 700; }
 p { margin: 6px 0 0; color: var(--muted); }
 .month-picker { display: grid; gap: 5px; }
 input[type="month"] {
@@ -53,21 +62,50 @@ input[type="month"] {
   padding: 8px;
   font-size: .88rem;
 }
-.editable-table th { background: #f0e9f8; text-align: left; }
+.editable-table th { background: #0f172a; color: #fff; text-align: left; font-weight: 800; }
 .editable-table input {
-  width: 100%; border: none; outline: none; background: transparent; font: inherit; color: inherit;
+  width: 100%;
+  border: 1px solid transparent;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  padding: 6px 8px;
+  border-radius: 10px;
 }
+.editable-table input:focus {
+  border-color: rgba(0,87,255,.55);
+  box-shadow: 0 0 0 3px rgba(0,87,255,.18);
+}
+
+.th-action, .td-action { width: 84px; text-align: center; }
+
 button {
   margin-top: 10px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  padding: 8px 10px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 12px 14px;
   background: var(--primary);
   color: #fff;
-  font-weight: 600;
+  font-weight: 800;
+  font-size: 1rem;
   cursor: pointer;
 }
 button:hover { background: var(--primary-dark); }
+button:active { transform: translateY(1px); }
+
+.btn-primary { background: var(--primary); }
+
+.btn-danger { background: var(--danger); }
+.btn-danger:hover { background: var(--danger-dark); }
+
+.btn-icon {
+  margin-top: 0;
+  padding: 10px 12px;
+  min-width: 48px;
+  border-radius: 12px;
+  line-height: 1;
+}
 .chart-card {
   height: 340px;
   display: flex;
