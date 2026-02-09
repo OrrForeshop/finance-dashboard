@@ -158,7 +158,12 @@ function recalc() {
     type: 'doughnut',
     data: {
       labels: ['Fixed expenses', 'Variable expenses', 'Remaining cash'],
-      datasets: [{ data: [fixed, variable, Math.max(cashflow, 0)], backgroundColor: ['#bda9d7', '#9f87c2', '#d8c8ea'] }]
+      datasets: [{
+        data: [fixed, variable, Math.max(cashflow, 0)],
+        backgroundColor: ['#f87171', '#ef4444', '#10b981'],
+        borderColor: 'rgba(255,255,255,.6)',
+        borderWidth: 2
+      }]
     },
     options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
   });
@@ -172,7 +177,14 @@ function recalc() {
     type: 'bar',
     data: {
       labels: allExpenseRows.map(r => r.category),
-      datasets: [{ label: 'Actual', data: allExpenseRows.map(r => r.actual), backgroundColor: '#bda9d7' }]
+      datasets: [{
+        label: 'Actual',
+        data: allExpenseRows.map(r => r.actual),
+        backgroundColor: 'rgba(239,68,68,.75)',
+        borderColor: 'rgba(239,68,68,1)',
+        borderWidth: 1,
+        borderRadius: 10
+      }]
     },
     options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
   });
@@ -183,7 +195,18 @@ function recalc() {
       labels: allExpenseRows.map(r => r.category),
       datasets: [{
         data: allExpenseRows.map(r => r.actual),
-        backgroundColor: ['#bda9d7','#9f87c2','#d8c8ea','#b49ad2','#c9b7e1','#a98fc9','#ddcfee','#8f78b8']
+        backgroundColor: [
+          'rgba(239,68,68,.85)',
+          'rgba(248,113,113,.82)',
+          'rgba(251,146,60,.80)',
+          'rgba(239,68,68,.70)',
+          'rgba(248,113,113,.68)',
+          'rgba(251,146,60,.66)',
+          'rgba(239,68,68,.58)',
+          'rgba(248,113,113,.56)'
+        ],
+        borderColor: 'rgba(255,255,255,.65)',
+        borderWidth: 2
       }]
     },
     options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
@@ -196,8 +219,22 @@ function recalc() {
     data: {
       labels: ['Fixed', 'Variable', 'Total'],
       datasets: [
-        { label: 'Planned', data: [plannedFixed, plannedVariable, plannedFixed + plannedVariable], backgroundColor: '#d8c8ea' },
-        { label: 'Actual', data: [fixed, variable, expenses], backgroundColor: '#9f87c2' }
+        {
+          label: 'Planned',
+          data: [plannedFixed, plannedVariable, plannedFixed + plannedVariable],
+          backgroundColor: 'rgba(47,107,255,.55)',
+          borderColor: 'rgba(47,107,255,1)',
+          borderWidth: 1,
+          borderRadius: 10
+        },
+        {
+          label: 'Actual',
+          data: [fixed, variable, expenses],
+          backgroundColor: 'rgba(239,68,68,.70)',
+          borderColor: 'rgba(239,68,68,1)',
+          borderWidth: 1,
+          borderRadius: 10
+        }
       ]
     },
     options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
@@ -207,7 +244,12 @@ function recalc() {
     type: 'pie',
     data: {
       labels: ['Assets', 'Liabilities'],
-      datasets: [{ data: [Math.max(assets, 0), Math.max(liabilities, 0)], backgroundColor: ['#bda9d7', '#e0a7b8'] }]
+      datasets: [{
+        data: [Math.max(assets, 0), Math.max(liabilities, 0)],
+        backgroundColor: ['rgba(16,185,129,.85)', 'rgba(239,68,68,.75)'],
+        borderColor: 'rgba(255,255,255,.65)',
+        borderWidth: 2
+      }]
     },
     options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
   });
@@ -215,31 +257,44 @@ function recalc() {
 
 function renderAll() {
   renderTable('incomeTable', seed.income, [
-    { key: 'source' }, { key: 'planned', type: 'number' }, { key: 'actual', type: 'number' }
+    { key: 'source', label: 'Income' },
+    { key: 'planned', label: 'Budget', type: 'number' },
+    { key: 'actual', label: 'Received', type: 'number' }
   ], { deletable: true });
 
   renderTable('savingsTable', seed.savings, [
-    { key: 'goal' }, { key: 'target', type: 'number' }, { key: 'current', type: 'number' }
+    { key: 'goal', label: 'Goal' },
+    { key: 'target', label: 'Goal $', type: 'number' },
+    { key: 'current', label: 'Saved $', type: 'number' }
   ], { deletable: true });
 
   // Expenses tables (both are expenses) — deletable rows
   renderTable('fixedTable', seed.fixed, [
-    { key: 'category' }, { key: 'planned', type: 'number' }, { key: 'actual', type: 'number' }
+    { key: 'category', label: 'Item' },
+    { key: 'planned', label: 'Budget', type: 'number' },
+    { key: 'actual', label: 'Spent', type: 'number' }
   ], { deletable: true });
 
   renderTable('variableTable', seed.variable, [
-    { key: 'category' }, { key: 'planned', type: 'number' }, { key: 'actual', type: 'number' }
+    { key: 'category', label: 'Item' },
+    { key: 'planned', label: 'Budget', type: 'number' },
+    { key: 'actual', label: 'Spent', type: 'number' }
   ], { deletable: true });
 
-  // Other tables unchanged
+  // Other tables
   renderTable('debtTable', seed.debt, [
-    { key: 'debt' }, { key: 'balance', type: 'number' }, { key: 'payment', type: 'number' }, { key: 'apr', type: 'number' }
+    { key: 'debt', label: 'Debt' },
+    { key: 'balance', label: 'Balance', type: 'number' },
+    { key: 'payment', label: 'Monthly Payment', type: 'number' },
+    { key: 'apr', label: 'APR %', type: 'number' }
   ]);
   renderTable('assetsTable', seed.assets, [
-    { key: 'asset' }, { key: 'value', type: 'number' }
+    { key: 'asset', label: 'Asset' },
+    { key: 'value', label: 'Value', type: 'number' }
   ]);
   renderTable('liabilitiesTable', seed.liabilities, [
-    { key: 'liability' }, { key: 'value', type: 'number' }
+    { key: 'liability', label: 'Liability' },
+    { key: 'value', label: 'Value', type: 'number' }
   ]);
   recalc();
 }
