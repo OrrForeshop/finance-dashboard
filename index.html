@@ -1,56 +1,208 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Finance Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <main class="app">
-    <header class="topbar">
-      <div class="brand">
-        <h1>Finance</h1>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Sidebar">
+      <div class="sidebar-title">Settings</div>
+
+      <div class="panel">
+        <div class="panel-row">
+          <label class="label" for="income">Monthly Income</label>
+          <input id="income" class="input" type="number" inputmode="decimal" step="0.01" />
+        </div>
+
+        <div class="panel-subtitle">Budgets</div>
+        <div class="panel-grid">
+          <div class="panel-row">
+            <label class="label" for="budgetDebt">Debt</label>
+            <input id="budgetDebt" class="input" type="number" inputmode="decimal" step="0.01" />
+          </div>
+          <div class="panel-row">
+            <label class="label" for="budgetSavings">Savings</label>
+            <input id="budgetSavings" class="input" type="number" inputmode="decimal" step="0.01" />
+          </div>
+          <div class="panel-row">
+            <label class="label" for="budgetVariable">Variable</label>
+            <input id="budgetVariable" class="input" type="number" inputmode="decimal" step="0.01" />
+          </div>
+          <div class="panel-row">
+            <label class="label" for="budgetFixed">Fixed</label>
+            <input id="budgetFixed" class="input" type="number" inputmode="decimal" step="0.01" />
+          </div>
+        </div>
       </div>
 
-      <div class="month">
-        <label for="month">Month</label>
-        <input id="month" type="month" />
+      <div class="sidebar-title" style="margin-top:14px;">General Overview</div>
+      <div class="panel overview">
+        <div class="overview-item">
+          <div class="overview-label">Total Expenses</div>
+          <div id="ovTotalExpenses" class="overview-value">$0.00</div>
+        </div>
+        <div class="overview-item">
+          <div class="overview-label">Total Saved</div>
+          <div id="ovTotalSaved" class="overview-value">$0.00</div>
+        </div>
+        <div class="overview-item">
+          <div class="overview-label">Remaining</div>
+          <div id="ovRemaining" class="overview-value">$0.00</div>
+        </div>
       </div>
-    </header>
 
-    <section class="kpi-card" aria-label="Summary">
-      <div class="kpi">
-        <div class="kpi-label">Remaining to Spend</div>
-        <div id="kpiRemaining" class="kpi-value">$0.00</div>
+      <div class="sidebar-title" style="margin-top:14px;">Savings</div>
+      <div class="panel">
+        <div id="listSavings" class="table" role="table" aria-label="Savings list">
+          <div class="thead" role="rowgroup">
+            <div class="tr" role="row">
+              <div class="th" role="columnheader">Name</div>
+              <div class="th" role="columnheader">Amount</div>
+              <div class="th th-action" role="columnheader"></div>
+            </div>
+          </div>
+          <div id="tbodySavings" class="tbody" role="rowgroup"></div>
+        </div>
+        <button id="addSavings" type="button" class="btn btn-secondary">+ Add Savings</button>
       </div>
-      <div class="kpi">
-        <div class="kpi-label">Total Saved</div>
-        <div id="kpiSaved" class="kpi-value kpi-blue">$0.00</div>
+
+      <div class="sidebar-footer">
+        <div class="hint">Data is stored locally in your browser (localStorage).</div>
       </div>
-    </section>
+    </aside>
 
-    <section class="section" aria-label="Money In">
-      <h2 class="section-title">Money In</h2>
-      <div id="listIn" class="list" role="list"></div>
-      <button id="addIn" type="button" class="btn">+ Add Money In</button>
-    </section>
+    <main class="main" aria-label="Main content">
+      <header class="header">
+        <div>
+          <div class="title">Finance Dashboard</div>
+          <div class="subtitle">Track budgets, spending, and remaining cash</div>
+        </div>
 
-    <section class="section" aria-label="Money Out">
-      <h2 class="section-title">Money Out</h2>
-      <div id="listOut" class="list" role="list"></div>
-      <button id="addOut" type="button" class="btn">+ Add Money Out</button>
-    </section>
+        <div class="header-controls">
+          <div class="month">
+            <label class="label" for="month">Month</label>
+            <input id="month" class="input" type="month" />
+          </div>
+        </div>
+      </header>
 
-    <section class="section" aria-label="Savings">
-      <h2 class="section-title">Savings</h2>
-      <div id="listSavings" class="list" role="list"></div>
-      <button id="addSavings" type="button" class="btn">+ Add Savings</button>
-    </section>
-  </main>
+      <section class="grid-top" aria-label="Top summary cards">
+        <div class="card kpi">
+          <div class="kpi-label">Debt</div>
+          <div id="kpiDebt" class="kpi-value">$0.00</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">Savings</div>
+          <div id="kpiSavings" class="kpi-value">$0.00</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">Variable Expenses</div>
+          <div id="kpiVariable" class="kpi-value">$0.00</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">Fixed Expenses</div>
+          <div id="kpiFixed" class="kpi-value">$0.00</div>
+        </div>
+      </section>
+
+      <section class="grid-middle" aria-label="Charts">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Distribution</div>
+            <div class="card-meta">Debt / Variable / Fixed / Savings</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chartDistribution" aria-label="Distribution pie chart" role="img"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Budget vs Actual</div>
+            <div class="card-meta">Compare budgets with spending</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chartBudget" aria-label="Budget vs Actual bar chart" role="img"></canvas>
+          </div>
+        </div>
+
+        <div class="card card-donut">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Remaining to Spend</div>
+              <div class="card-meta">Income minus expenses and savings</div>
+            </div>
+            <div id="donutLabel" class="pill">$0.00</div>
+          </div>
+          <div class="chart-wrap donut">
+            <canvas id="chartRemaining" aria-label="Remaining to spend donut chart" role="img"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid-bottom" aria-label="Detailed tables">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Debt</div>
+            <button id="addDebt" type="button" class="btn">+ Add</button>
+          </div>
+          <div class="table" role="table" aria-label="Debt table">
+            <div class="thead" role="rowgroup">
+              <div class="tr" role="row">
+                <div class="th" role="columnheader">Name</div>
+                <div class="th" role="columnheader">Amount</div>
+                <div class="th th-action" role="columnheader"></div>
+              </div>
+            </div>
+            <div id="tbodyDebt" class="tbody" role="rowgroup"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Variable Expenses</div>
+            <button id="addVariable" type="button" class="btn">+ Add</button>
+          </div>
+          <div class="table" role="table" aria-label="Variable expenses table">
+            <div class="thead" role="rowgroup">
+              <div class="tr" role="row">
+                <div class="th" role="columnheader">Name</div>
+                <div class="th" role="columnheader">Amount</div>
+                <div class="th th-action" role="columnheader"></div>
+              </div>
+            </div>
+            <div id="tbodyVariable" class="tbody" role="rowgroup"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Fixed Expenses</div>
+            <button id="addFixed" type="button" class="btn">+ Add</button>
+          </div>
+          <div class="table" role="table" aria-label="Fixed expenses table">
+            <div class="thead" role="rowgroup">
+              <div class="tr" role="row">
+                <div class="th" role="columnheader">Name</div>
+                <div class="th" role="columnheader">Amount</div>
+                <div class="th th-action" role="columnheader"></div>
+              </div>
+            </div>
+            <div id="tbodyFixed" class="tbody" role="rowgroup"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">Finance Dashboard • Local-only storage • LTR</footer>
+    </main>
+  </div>
 
   <script src="./app.js"></script>
 </body>
