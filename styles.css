@@ -174,34 +174,32 @@ button{
   margin-top:10px;
   border:1px solid transparent;
   border-radius:14px;
-  padding:12px 14px;
+  padding:14px 20px;
   background:var(--primary);
   color:#fff;
-  font-weight:850;
-  font-size:1rem;
+  font-weight:900;
+  font-size:1.1rem;
   cursor:pointer;
   box-shadow:0 10px 22px rgba(47,107,255,.25);
 }
-button:hover{background:var(--primary-700)}
-button:active{transform:translateY(1px)}
-
-.btn-primary{background:var(--primary)}
 
 /* Icon-only delete button */
 .btn-icon{
   margin-top:0;
   padding:10px 12px;
-  min-width:44px;
+  min-width:50px;
+  height:44px;
   border-radius:14px;
   line-height:1;
-  background:rgba(239,68,68,.10);
-  color:#9b1c1c;
-  border:1px solid rgba(239,68,68,.22);
+  background:#fee2e2;
+  color:#dc2626;
+  border:2px solid #fecaca;
+  font-size:1.4rem;
   box-shadow:none;
 }
 .btn-icon:hover{
-  background:rgba(239,68,68,.16);
-  border-color:rgba(239,68,68,.30);
+  background:#fecaca;
+  color:#b91c1c;
 }
 
 .chart-card{height:340px;display:flex;flex-direction:column}
