@@ -60,17 +60,18 @@
 
       <div class="sidebar-title" style="margin-top:14px;">Savings</div>
       <div class="panel">
-        <div id="listSavings" class="table" role="table" aria-label="Savings list">
-          <div class="thead" role="rowgroup">
-            <div class="tr" role="row">
-              <div class="th" role="columnheader">Name</div>
-              <div class="th" role="columnheader">Amount</div>
-              <div class="th th-action" role="columnheader"></div>
-            </div>
-          </div>
-          <div id="tbodySavings" class="tbody" role="rowgroup"></div>
+        <div class="sheet-wrap" aria-label="Savings sheet">
+          <table class="sheet" data-section="savings" aria-label="Savings table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th class="col-amt">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="tbodySavings"></tbody>
+          </table>
         </div>
-        <button id="addSavings" type="button" class="btn btn-secondary">+ Add Savings</button>
+        <div class="hint" style="margin-top:10px;">Tip: Click a cell and type. Tab/Shift+Tab moves left/right. Enter moves down.</div>
       </div>
 
       <div class="sidebar-footer">
@@ -151,51 +152,54 @@
         <div class="card">
           <div class="card-head">
             <div class="card-title">Debt</div>
-            <button id="addDebt" type="button" class="btn">+ Add</button>
+            <div class="card-meta">20 rows • edit directly like a spreadsheet</div>
           </div>
-          <div class="table" role="table" aria-label="Debt table">
-            <div class="thead" role="rowgroup">
-              <div class="tr" role="row">
-                <div class="th" role="columnheader">Name</div>
-                <div class="th" role="columnheader">Amount</div>
-                <div class="th th-action" role="columnheader"></div>
-              </div>
-            </div>
-            <div id="tbodyDebt" class="tbody" role="rowgroup"></div>
+          <div class="sheet-wrap">
+            <table class="sheet" data-section="debt" aria-label="Debt table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th class="col-amt">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDebt"></tbody>
+            </table>
           </div>
         </div>
 
         <div class="card">
           <div class="card-head">
             <div class="card-title">Variable Expenses</div>
-            <button id="addVariable" type="button" class="btn">+ Add</button>
+            <div class="card-meta">20 rows • edit directly like a spreadsheet</div>
           </div>
-          <div class="table" role="table" aria-label="Variable expenses table">
-            <div class="thead" role="rowgroup">
-              <div class="tr" role="row">
-                <div class="th" role="columnheader">Name</div>
-                <div class="th" role="columnheader">Amount</div>
-                <div class="th th-action" role="columnheader"></div>
-              </div>
-            </div>
-            <div id="tbodyVariable" class="tbody" role="rowgroup"></div>
+          <div class="sheet-wrap">
+            <table class="sheet" data-section="variable" aria-label="Variable expenses table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th class="col-amt">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyVariable"></tbody>
+            </table>
           </div>
         </div>
 
         <div class="card">
           <div class="card-head">
             <div class="card-title">Fixed Expenses</div>
-            <button id="addFixed" type="button" class="btn">+ Add</button>
+            <div class="card-meta">20 rows • edit directly like a spreadsheet</div>
           </div>
-          <div class="table" role="table" aria-label="Fixed expenses table">
-            <div class="thead" role="rowgroup">
-              <div class="tr" role="row">
-                <div class="th" role="columnheader">Name</div>
-                <div class="th" role="columnheader">Amount</div>
-                <div class="th th-action" role="columnheader"></div>
-              </div>
-            </div>
-            <div id="tbodyFixed" class="tbody" role="rowgroup"></div>
+          <div class="sheet-wrap">
+            <table class="sheet" data-section="fixed" aria-label="Fixed expenses table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th class="col-amt">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyFixed"></tbody>
+            </table>
           </div>
         </div>
       </section>
