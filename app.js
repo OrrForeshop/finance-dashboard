@@ -21,10 +21,43 @@ function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+function migrateFromV2() {
+  try {
+    const raw = localStorage.getItem('finance-dashboard.v2');
+    if (!raw) return null;
+    const old = JSON.parse(raw);
+    if (!old || typeof old !== 'object' || !old.months) return null;
+
+    const next = { months: {} };
+    for (const [ym, ms] of Object.entries(old.months)) {
+      const income = (ms?.in || []).reduce((a, r) => a + n(r.amount), 0);
+      const variable = (ms?.out || []).map(r => ({ id: uid(), name: r.name ?? 'Expense', amount: n(r.amount) }));
+      const savings = (ms?.savings || []).map(r => ({ id: uid(), name: r.name ?? 'Savings', amount: n(r.amount) }));
+
+      next.months[ym] = {
+        income,
+        budgets: { debt: 0, savings: 0, variable: 0, fixed: 0 },
+        debt: [],
+        savings,
+        variable,
+        fixed: [],
+      };
+    }
+    return next;
+  } catch {
+    return null;
+  }
+}
+
 function loadStore() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { months: {} };
+    if (!raw) {
+      // One-time migration from earlier simple dashboard
+      const migrated = migrateFromV2();
+      if (migrated) return migrated;
+      return { months: {} };
+    }
     const data = JSON.parse(raw);
     if (!data || typeof data !== 'object') return { months: {} };
     if (!data.months || typeof data.months !== 'object') data.months = {};
