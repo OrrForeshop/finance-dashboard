@@ -36,12 +36,12 @@ body{
   border-right:1px solid var(--stroke);
 }
 .sidebar-title{
-  font-size:12px;
-  letter-spacing:.12em;
+  font-size:13px;
+  letter-spacing:.04em;
   text-transform:uppercase;
-  color:var(--muted2);
+  color:var(--text);
   margin:10px 0 10px;
-  font-weight:800;
+  font-weight:900;
 }
 .sidebar-footer{margin-top:14px}
 .hint{color:var(--muted2); font-size:12px; line-height:1.4}
@@ -55,7 +55,7 @@ body{
   gap:18px;
   margin-bottom:16px;
 }
-.title{font-size:34px; font-weight:900; line-height:1; letter-spacing:-.02em}
+.title{font-size:38px; font-weight:900; line-height:1; letter-spacing:-.04em; color:var(--text)}
 .subtitle{margin-top:6px; color:var(--muted); font-size:13px}
 .header-controls{display:flex; gap:10px; align-items:flex-end}
 
@@ -66,7 +66,7 @@ body{
   padding:14px;
   box-shadow: 0 8px 22px rgba(17,24,39,.06);
 }
-.panel-subtitle{margin-top:12px; margin-bottom:8px; color:var(--muted); font-size:12px; font-weight:800}
+.panel-subtitle{margin-top:12px; margin-bottom:8px; color:var(--text); font-size:14px; font-weight:900; letter-spacing:-.02em}
 .panel-row{display:flex; flex-direction:column; gap:6px; margin-bottom:10px}
 .panel-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
 
@@ -91,8 +91,8 @@ body{
 }
 
 .kpi{padding:16px}
-.kpi-label{color:var(--muted2); font-size:12px; letter-spacing:.08em; text-transform:uppercase; font-weight:900}
-.kpi-value{font-size:22px; font-weight:900; margin-top:10px}
+.kpi-label{color:var(--text); font-size:13px; letter-spacing:.02em; text-transform:uppercase; font-weight:900}
+.kpi-value{font-size:26px; font-weight:900; margin-top:10px; letter-spacing:-.03em}
 
 .grid-top{display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-bottom:14px}
 .grid-middle{display:grid; grid-template-columns: 1.05fr 1.05fr 1.4fr; gap:14px; margin-bottom:14px}
@@ -106,7 +106,7 @@ body{
   padding:14px 14px 10px;
   border-bottom:1px solid var(--stroke);
 }
-.card-title{font-weight:900; font-size:14px; letter-spacing:.02em}
+.card-title{font-weight:900; font-size:16px; letter-spacing:-.02em; color:var(--text)}
 .card-meta{color:var(--muted2); font-size:12px; margin-top:4px}
 
 .pill{
