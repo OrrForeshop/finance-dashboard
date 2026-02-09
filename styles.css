@@ -87,6 +87,65 @@ input[type="month"]:focus{
   box-shadow:0 0 0 4px rgba(47,107,255,.18);
 }
 
+.magic{margin-bottom:14px}
+
+.magic-card{padding:18px}
+.magic-top{display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+.magic-title{margin:0;font-size:1.25rem;letter-spacing:-0.02em}
+.magic-help{margin-top:6px}
+
+.magic-today{
+  text-align:right;
+  min-width:260px;
+}
+.today-budget{
+  font-size:3rem;
+  font-weight:900;
+  line-height:1.05;
+  letter-spacing:-0.04em;
+  margin-top:6px;
+  color:var(--text);
+}
+.today-sub{margin-top:4px;color:rgba(11,18,32,.65);font-weight:800}
+
+.magic-bar{display:flex;gap:12px;margin-top:14px}
+.magic-input{
+  flex:1;
+  border:2px solid rgba(47,107,255,.25);
+  border-radius:16px;
+  padding:16px 16px;
+  background:var(--surface-strong);
+  font:inherit;
+  font-size:1.2rem;
+  font-weight:750;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset;
+}
+.magic-input:focus{
+  outline:none;
+  border-color:rgba(47,107,255,.55);
+  box-shadow:0 0 0 6px rgba(47,107,255,.16);
+}
+.magic-btn{
+  margin-top:0;
+  padding:16px 26px;
+  border-radius:16px;
+  font-size:1.35rem;
+  font-weight:950;
+  min-width:140px;
+  box-shadow:0 18px 38px rgba(47,107,255,.32);
+}
+.magic-status{margin-top:10px;font-weight:850;color:rgba(11,18,32,.72)}
+.magic-status.good{color:var(--income)}
+.magic-status.bad{color:var(--expense)}
+
+@media (max-width: 720px){
+  .magic-top{flex-direction:column;align-items:stretch}
+  .magic-today{text-align:left;min-width:auto}
+  .today-budget{font-size:2.6rem}
+  .magic-bar{flex-direction:column}
+  .magic-btn{width:100%}
+}
+
 .kpis{
   display:grid;
   grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
@@ -134,6 +193,20 @@ input[type="month"]:focus{
   border-top:1px solid rgba(15,23,42,.10);
   border-bottom:1px solid rgba(15,23,42,.10);
 }
+
+/* Make category emojis feel big and obvious */
+.editable-table tbody td:first-child input{
+  font-weight:950;
+  font-size:1.05rem;
+}
+
+/* Traffic light for Spent cells (actual vs planned) */
+.tl-green{background:rgba(16,185,129,.14)}
+.tl-yellow{background:rgba(234,179,8,.18)}
+.tl-red{background:rgba(239,68,68,.16)}
+.tl-green input{background:transparent}
+.tl-yellow input{background:transparent}
+.tl-red input{background:transparent}
 
 .editable-table tbody td:first-child{
   border-left:1px solid rgba(15,23,42,.10);

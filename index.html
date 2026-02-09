@@ -22,6 +22,27 @@
       </div>
     </header>
 
+    <section class="magic">
+      <div class="card magic-card">
+        <div class="magic-top">
+          <div>
+            <h2 class="magic-title">✨ Magic Add</h2>
+            <p class="help magic-help">Type something simple like <b>"50 gas"</b>, <b>"2000 salary"</b>, <b>"1500 rent"</b>, <b>"12 coffee"</b> and hit Enter.</p>
+          </div>
+          <div class="magic-today">
+            <h3>Today’s Budget</h3>
+            <div id="kpiTodayBudget" class="today-budget">$0.00</div>
+            <div id="kpiTodayBudgetSub" class="today-sub">—</div>
+          </div>
+        </div>
+        <div class="magic-bar">
+          <input id="magicAddInput" class="magic-input" type="text" placeholder='e.g. "50 for gas" or "2000 bonus"' autocomplete="off" />
+          <button id="magicAddBtn" type="button" class="magic-btn">ADD</button>
+        </div>
+        <div id="magicAddStatus" class="magic-status" aria-live="polite"></div>
+      </div>
+    </section>
+
     <section class="kpis">
       <div class="card kpi"><h3>Total Income</h3><p id="kpiIncome">$0.00</p></div>
       <div class="card kpi"><h3>Total Expenses</h3><p id="kpiExpenses">$0.00</p></div>
