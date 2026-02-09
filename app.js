@@ -49,6 +49,8 @@ function renderTable(tableId, rows, fields, opts = {}) {
 
     fields.forEach((f) => {
       const td = document.createElement('td');
+      td.dataset.label = f.label || f.key;
+
       const input = document.createElement('input');
       input.value = row[f.key] ?? '';
       input.type = f.type || 'text';
@@ -66,11 +68,12 @@ function renderTable(tableId, rows, fields, opts = {}) {
     if (opts.deletable) {
       const td = document.createElement('td');
       td.className = 'td-action';
+      td.dataset.label = 'Delete';
 
       const del = document.createElement('button');
       del.type = 'button';
-      del.className = 'btn-danger btn-icon';
-      del.textContent = 'X';
+      del.className = 'btn-icon';
+      del.textContent = '🗑️';
       del.title = 'Delete row';
       del.setAttribute('aria-label', 'Delete row');
       del.addEventListener('click', (e) => {
