@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Finance Management Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar card">
+      <div>
+        <h1>Financial Management Dashboard</h1>
+        <p>Clean monthly control center for income, spending, savings, debt, and goals.</p>
+      </div>
+      <div class="month-picker">
+        <label for="month">Month</label>
+        <input id="month" type="month" />
+      </div>
+    </header>
+
+    <section class="kpis">
+      <div class="card kpi"><h3>Total Income</h3><p id="kpiIncome">$0.00</p></div>
+      <div class="card kpi"><h3>Total Expenses</h3><p id="kpiExpenses">$0.00</p></div>
+      <div class="card kpi"><h3>Net Cash Flow</h3><p id="kpiCashflow">$0.00</p></div>
+      <div class="card kpi"><h3>Savings Rate</h3><p id="kpiSavingsRate">0%</p></div>
+      <div class="card kpi"><h3>Debt-to-Income</h3><p id="kpiDti">0%</p></div>
+      <div class="card kpi"><h3>Emergency Fund</h3><p id="kpiEmergency">0.0 months</p></div>
+      <div class="card kpi"><h3>Net Worth</h3><p id="kpiNetWorth">$0.00</p></div>
+      <div class="card kpi"><h3>Goal Progress</h3><p id="kpiGoal">0%</p></div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card">
+        <h2>Income Sources</h2>
+        <table id="incomeTable" class="editable-table">
+          <thead><tr><th>Source</th><th>Planned</th><th>Actual</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button type="button" data-add="income">+ Add Income Source</button>
+      </div>
+      <div class="card">
+        <h2>Savings Goals / Sinking Funds</h2>
+        <table id="savingsTable" class="editable-table">
+          <thead><tr><th>Goal</th><th>Target</th><th>Current</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button type="button" data-add="savings">+ Add Goal</button>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card">
+        <h2>Fixed Expenses (Needs)</h2>
+        <table id="fixedTable" class="editable-table">
+          <thead><tr><th>Category</th><th>Planned</th><th>Actual</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button type="button" data-add="fixed">+ Add Fixed Expense</button>
+      </div>
+      <div class="card">
+        <h2>Variable Expenses (Wants & Lifestyle)</h2>
+        <table id="variableTable" class="editable-table">
+          <thead><tr><th>Category</th><th>Planned</th><th>Actual</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button type="button" data-add="variable">+ Add Variable Expense</button>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card chart-card">
+        <h2>Spending Mix (Doughnut)</h2>
+        <canvas id="spendingMix"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h2>Top Expense Categories (Bar)</h2>
+        <canvas id="topExpenses"></canvas>
+      </div>
+    </section>
+
+    <section class="grid-3">
+      <div class="card chart-card small">
+        <h2>Expense Distribution (Pie)</h2>
+        <canvas id="expensePie"></canvas>
+      </div>
+      <div class="card chart-card small">
+        <h2>Budget vs Actual (Bar)</h2>
+        <canvas id="budgetVsActual"></canvas>
+      </div>
+      <div class="card chart-card small">
+        <h2>Assets vs Liabilities (Pie)</h2>
+        <canvas id="netWorthPie"></canvas>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card">
+        <h2>Debt Tracker</h2>
+        <table id="debtTable" class="editable-table">
+          <thead><tr><th>Debt</th><th>Balance</th><th>Monthly Payment</th><th>APR %</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button type="button" data-add="debt">+ Add Debt</button>
+      </div>
+      <div class="card">
+        <h2>Assets & Liabilities (Net Worth)</h2>
+        <table id="assetsTable" class="editable-table">
+          <thead><tr><th>Asset</th><th>Value</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button type="button" data-add="asset">+ Add Asset</button>
+        <table id="liabilitiesTable" class="editable-table mt-16">
+          <thead><tr><th>Liability</th><th>Value</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button type="button" data-add="liability">+ Add Liability</button>
+      </div>
+    </section>
+
+    <section class="card notes">
+      <h2>Monthly Review Notes</h2>
+      <textarea placeholder="Write wins, issues, upcoming bills, and next actions..."></textarea>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
